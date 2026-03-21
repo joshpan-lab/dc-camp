@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大衛門徒營 - #DDC 動態經文卡</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; overflow-x: hidden; background: #0f172a; }
+        .app-card { background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px); }
+        .btn-genz { background-color: #bef264; color: #0f172a; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-genz:hover { background-color: #ffffff; transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(190, 242, 100, 0.4); }
+        .btn-genz:active { transform: translateY(0); scale: 0.98; }
+        .card-container { perspective: 1000px; }
+        .card { transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; }
+        .card.is-flipped { transform: rotateY(180deg); }
+        .card-face { backface-visibility: hidden; position: absolute; width: 100%; height: 100%; border-radius: 1.5rem; }
+        .card-back { transform: rotateY(180deg); }
+        .pulse-animation { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 20px rgba(190, 242, 100, 0.6); } 100% { transform: scale(0.95); opacity: 0.8; } }
+        /* 縮小字母間距以適應手機 */
+        .scrambling-text { font-family: monospace; letter-spacing: 1px; color: #bef264; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="app-container" class="app-card rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden border border-slate-700">
+        
+        <div class="bg-indigo-600 p-8 text-center relative overflow-hidden">
+            <h1 class="text-4xl font-black tracking-tighter text-white relative z-10">#大衛門徒營</h1>
+            <p class="text-indigo-200 mt-2 text-sm font-bold relative z-10">專屬祝福卡・看見神對你的心意</p>
+        </div>
+
+        <!-- 表單區塊 -->
+        <div id="form-section" class="p-8">
+            <form id="draw-form" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-1">你的名字</label>
+                    <input type="text" id="userName" required class="w-full px-4 py-3 rounded-xl bg-slate-800 border-2 border-slate-600 text-white font-bold outline-none focus:border-bef264">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-300 mb-1">電子信箱 (作為抽卡唯一憑證)</label>
+                    <input type="email" id="userEmail" required class="w-full px-4 py-3 rounded-xl bg-slate-800 border-2 border-slate-600 text-white font-bold outline-none focus:border-bef264">
+                </div>
+                <div class="flex items-start mt-4 bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                    <input type="checkbox" id="igCheck" required class="mt-1 w-5 h-5 text-fuchsia-500 rounded bg-slate-700 border-slate-500">
+                    <label for="igCheck" class="ml-3 text-sm text-slate-300 font-bold">我已追蹤官方 IG</label>
+                </div>
+                <!-- 測試模式提示 -->
+                <p id="test-mode-warning" class="text-xs text-fuchsia-400 font-bold text-center hidden">※ 目前為模擬測試模式，不會真實寄信 ※</p>
+                <button type="submit" id="submit-btn" class="btn-genz w-full font-black py-4 px-4 rounded-xl shadow-lg">開始抽卡</button>
+            </form>
+        </div>
+
+        <!-- 處理中載入區塊 -->
+        <div id="loading-section" class="p-8 hidden flex flex-col items-center justify-center h-80 relative">
+            <div class="w-16 h-16 bg-fuchsia-600 rounded-full pulse-animation absolute top-1/3 z-0 blur-md"></div>
+            <div class="w-12 h-12 bg-white rounded-full z-10 absolute top-1/3 flex items-center justify-center">
+                <span class="text-2xl font-black text-fuchsia-600">?</span>
+            </div>
+            <div class="mt-32 text-center z-10 w-full">
+                <p class="text-lg font-black text-slate-200 mb-2">正在讀取專屬經文...</p>
+                <!-- 將文字區塊改為適應手機大小 (text-xs) -->
+                <div class="h-auto overflow-hidden bg-slate-900 rounded p-2 mx-1 flex justify-center">
+                    <p id="scramble-text" class="scrambling-text text-[11px] sm:text-xs text-center break-all">CHECKING_CREDENTIALS...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 抽卡結果區塊 -->
+        <div id="result-section" class="p-6 hidden flex flex-col items-center">
+            <h2 class="text-xl font-bold text-white mb-4 text-center" id="greeting-text"></h2>
+            
+            <!-- 動態生成的經文卡 -->
+            <div class="card-container w-full aspect-[4/5] relative" id="verse-card-container">
+                <div class="card w-full h-full relative rounded-2xl shadow-2xl" id="verse-card">
+                    <div class="card-face bg-slate-800 flex items-center justify-center border-4 border-slate-600">
+                        <span class="text-slate-400 text-6xl font-black">?</span>
+                    </div>
+                    <div id="dynamic-card-front" class="card-face card-back flex flex-col justify-center items-center text-center p-6 border-4 border-white">
+                        <p id="verse-zh" class="text-white text-lg font-bold leading-relaxed mb-4"></p>
+                        <p id="verse-en" class="text-white/70 text-[10px] font-medium italic mb-6"></p>
+                        <span id="verse-ref" class="text-xs font-black text-slate-900 bg-white px-4 py-1.5 rounded-full uppercase"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 兌換糖果指示區塊 (改為白底黑字，增加高對比度) -->
+            <div class="mt-6 w-full bg-white p-4 rounded-xl border-4 border-bef264 text-center transform hover:scale-105 transition shadow-[0_0_15px_rgba(190,242,100,0.3)]">
+                <p class="text-slate-500 text-xs font-bold mb-1">憑此畫面至兌換區領取小禮物：</p>
+                <p id="snack-name" class="text-slate-900 text-xl font-black"></p>
+            </div>
+
+            <div class="mt-4 text-center w-full">
+                <button onclick="resetForm()" class="w-full text-slate-400 hover:text-white text-sm font-bold py-2 underline transition">讓下一位青年抽卡</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 經文庫 (請將你的 40 節完整貼上) ---
+        const verses = [
+    { ref: "撒母耳記上 16:7", zh: "耶和華不像人看人：人是看外貌；耶和華是看內心。", en: "The Lord does not look at the things people look at. People look at the outward appearance, but the Lord looks at the heart." },
+    { ref: "撒母耳記上 17:45", zh: "你來攻擊我，是靠著刀槍和銅戟；我來攻擊你，是靠著萬軍之耶和華的名。", en: "You come against me with sword and spear and javelin, but I come against you in the name of the Lord Almighty." },
+    { ref: "撒母耳記上 30:6", zh: "大衛卻倚靠耶和華他的神，心裡堅固。", en: "But David found strength in the Lord his God." },
+    { ref: "詩篇 16:11", zh: "你必將生命的道路指示我。在你面前有滿足的喜樂；在你右手中有永遠的福樂。", en: "You make known to me the path of life; you will fill me with joy in your presence, with eternal pleasures at your right hand." },
+    { ref: "詩篇 18:2", zh: "耶和華是我的巖石，我的山寨，我的救主，我的神，我的磐石，我所投靠的。", en: "The Lord is my rock, my fortress and my deliverer; my God is my rock, in whom I take refuge, my shield and the horn of my salvation, my stronghold." },
+    { ref: "詩篇 23:1-2", zh: "耶和華是我的牧者，我必不致缺乏。他使我躺臥在青草地上，領我在可安歇的水邊。", en: "The Lord is my shepherd, I lack nothing. He makes me lie down in green pastures, he leads me beside quiet waters." },
+    { ref: "詩篇 23:4", zh: "我雖然行過死蔭的幽谷，也不怕遭害，因為你與我同在；你的杖，你的竿，都安慰我。", en: "Even though I walk through the darkest valley, I will fear no evil, for you are with me; your rod and your staff, they comfort me." },
+    { ref: "詩篇 27:1", zh: "耶和華是我的亮光，是我的拯救，我還怕誰呢？耶和華是我性命的保障，我還懼誰呢？", en: "The Lord is my light and my salvation—whom shall I fear? The Lord is the stronghold of my life—of whom shall I be afraid?" },
+    { ref: "詩篇 27:4", zh: "有一件事，我曾求耶和華，我仍要尋求：就是一生一世住在耶和華的殿中，瞻仰他的榮美。", en: "One thing I ask from the Lord, this only do I seek: that I may dwell in the house of the Lord all the days of my life, to gaze on the beauty of the Lord and to seek him in his temple." },
+    { ref: "詩篇 32:7", zh: "你是我藏身之處；你必保佑我脫離苦難，以得救的樂歌四面環繞我。", en: "You are my hiding place; you will protect me from trouble and surround me with songs of deliverance." },
+    { ref: "詩篇 34:8", zh: "你們要嘗嘗主恩的滋味，便知道他是美善；投靠他的人有福了！", en: "Taste and see that the Lord is good; blessed is the one who takes refuge in him." },
+    { ref: "詩篇 37:4", zh: "又要以耶和華為樂，他就將你心裡所求的賜給你。", en: "Take delight in the Lord, and he will give you the desires of your heart." },
+    { ref: "詩篇 37:5", zh: "當將你的事交託耶和華，並倚靠他，他就必成全。", en: "Commit your way to the Lord; trust in him and he will do this." },
+    { ref: "詩篇 46:1", zh: "神是我們的避難所，是我們的力量，是我們在患難中隨時的幫助。", en: "God is our refuge and strength, an ever-present help in trouble." },
+    { ref: "詩篇 51:10", zh: "神啊，求你為我造清潔的心，使我裡面重新有正直的靈。", en: "Create in me a pure heart, O God, and renew a steadfast spirit within me." },
+    { ref: "詩篇 62:1", zh: "我的心默默無聲，專等候神；我的救恩是從他而來。", en: "Truly my soul finds rest in God; my salvation comes from him." },
+    { ref: "詩篇 84:11", zh: "因為耶和華神是日頭，是盾牌，要賜下恩典和榮耀。他未嘗留下一樣好處不給那些行動正直的人。", en: "For the Lord God is a sun and shield; the Lord bestows favor and honor; no good thing does he withhold from those whose walk is blameless." },
+    { ref: "詩篇 103:2-3", zh: "我的心哪，你要稱頌耶和華！不可忘記他的一切恩惠！他赦免你的一切罪孽，醫治你的一切疾病。", en: "Praise the Lord, my soul, and forget not all his benefits—who forgives all your sins and heals all your diseases." },
+    { ref: "詩篇 119:105", zh: "你的話是我腳前的燈，是我路上的光。", en: "Your word is a lamp for my feet, a light on my path." },
+    { ref: "詩篇 121:1-2", zh: "我要向山舉目；我的幫助從何而來？我的幫助從造天地的耶和華而來。", en: "I lift up my eyes to the mountains—where does my help come from? My help comes from the Lord, the Maker of heaven and earth." },
+    { ref: "詩篇 139:14", zh: "我要稱謝你，因我受造，奇妙可畏；你的作為奇妙，這是我心深知道的。", en: "I praise you because I am fearfully and wonderfully made; your works are wonderful, I know that full well." },
+    { ref: "詩篇 139:23-24", zh: "神啊，求你鑒察我，知道我的心思，看在我裡面有什麼惡行沒有，引導我走永生的道路。", en: "Search me, God, and know my heart; test me and know my anxious thoughts. See if there is any offensive way in me, and lead me in the way everlasting." },
+    { ref: "箴言 3:5-6", zh: "你要專心仰賴耶和華，不可倚靠自己的聰明，在你一切所行的事上都要認定他，他必指引你的路。", en: "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight." },
+    { ref: "箴言 4:23", zh: "你要保守你心，勝過保守一切，因為一生的果效是由心發出。", en: "Above all else, guard your heart, for everything you do flows from it." },
+    { ref: "以賽亞書 40:31", zh: "但那等候耶和華的必重新得力。他們必如鷹展翅上騰；他們奔跑卻不困倦，行走卻不疲乏。", en: "But those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary, they will walk and not be faint." },
+    { ref: "以賽亞書 41:10", zh: "你不要害怕，因為我與你同在；不要驚惶，因為我是你的神。我必堅固你，我必幫助你。", en: "So do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you; I will uphold you with my righteous right hand." },
+    { ref: "耶利米書 29:11", zh: "耶和華說：我知道我向你們所懷的意念是賜平安的意念，不是降災禍的意念，要叫你們末後有指望。", en: "For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future." },
+    { ref: "耶利米哀歌 3:22-23", zh: "我們不致消滅，是出於耶和華諸般的慈愛；是因他的憐憫不致斷絕。每早晨，這都是新的；你的誠實極其廣大！", en: "Because of the Lord’s great love we are not consumed, for his compassions never fail. They are new every morning; great is your faithfulness." },
+    { ref: "西番雅書 3:17", zh: "耶和華你的神是施行拯救、大有能力的主。他在你中間必因你歡欣喜樂，默然愛你，且因你喜樂而歡呼。", en: "The Lord your God is with you, the Mighty Warrior who saves. He will take great delight in you; in his love he will no longer rebuke you, but will rejoice over you with singing." },
+    { ref: "馬太福音 11:28", zh: "凡勞苦擔重擔的人可以到我這裡來，我就使你們得安息。", en: "Come to me, all you who are weary and burdened, and I will give you rest." },
+    { ref: "約翰福音 14:27", zh: "我留下平安給你們；我將我的平安賜給你們。我所賜的，不像世人所賜的。你們心裡不要憂愁，也不要膽怯。", en: "Peace I leave with you; my peace I give you. I do not give to you as the world gives. Do not let your hearts be troubled and do not be afraid." },
+    { ref: "羅馬書 8:28", zh: "我們曉得萬事都互相效力，叫愛神的人得益處，就是按他旨意被召的人。", en: "And we know that in all things God works for the good of those who love him, who have been called according to his purpose." },
+    { ref: "羅馬書 12:2", zh: "不要效法這個世界，只要心意更新而變化，叫你們察驗何為神的善良、純全、可喜悅的旨意。", en: "Do not conform to the pattern of this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what God’s will is—his good, pleasing and perfect will." },
+    { ref: "羅馬書 15:13", zh: "但願使人有盼望的神，因信將諸般的喜樂、平安充滿你們的心，使你們藉著聖靈的能力大有盼望。", en: "May the God of hope fill you with all joy and peace as you trust in him, so that you may overflow with hope by the power of the Holy Spirit." },
+    { ref: "哥林多後書 5:17", zh: "若有人在基督裡，他就是新造的人，舊事已過，都變成新的了。", en: "Therefore, if anyone is in Christ, the new creation has come: The old has gone, the new is here!" },
+    { ref: "加拉太書 5:22-23", zh: "聖靈所結的果子，就是仁愛、喜樂、和平、忍耐、恩慈、良善、信實、溫柔、節制。", en: "But the fruit of the Spirit is love, joy, peace, forbearance, kindness, goodness, faithfulness, gentleness and self-control." },
+    { ref: "以弗所書 2:10", zh: "我們原是他的工作，在基督耶穌裡造成的，為要叫我們行善，就是神所預備叫我們行的。", en: "For we are God’s handiwork, created in Christ Jesus to do good works, which God prepared in advance for us to do." },
+    { ref: "以弗所書 3:20", zh: "神能照著運行在我們心裡的大力充充足足地成就一切，超過我們所求所想的。", en: "Now to him who is able to do immeasurably more than all we ask or imagine, according to his power that is at work within us." },
+    { ref: "腓立比書 4:6-7", zh: "應當一無掛慮，只要凡事藉著禱告、祈求，和感謝，將你們所要的告訴神。神所賜出人意外的平安必在基督耶穌裡保守你們的心懷意念。", en: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus." },
+    { ref: "提摩太後書 1:7", zh: "因為神賜給我們，不是膽怯的心，乃是剛強、仁愛、謹守的心。", en: "For the Spirit God gave us does not make us timid, but gives us power, love and self-discipline." }
+        ];
+
+        // --- 將背景色與實體糖果綁定 ---
+        const themeStyles = [
+            { bg: "linear-gradient(135deg, #a855f7, #ec4899)", snack: "🍇 紫色葡萄軟糖", msg: "代表天父溫柔的愛" },
+            { bg: "linear-gradient(135deg, #06b6d4, #3b82f6)", snack: "🧊 藍色沁涼薄荷糖", msg: "代表出人意外的平安" },
+            { bg: "linear-gradient(135deg, #84cc16, #10b981)", snack: "🍏 綠色青蘋果糖", msg: "代表在真理中成長" },
+            { bg: "linear-gradient(135deg, #f43f5e, #f97316)", snack: "🍊 橘色可樂/橘子糖", msg: "代表領受聖靈的火" },
+            { bg: "linear-gradient(135deg, #4f46e5, #9333ea)", snack: "🍫 迷你巧克力", msg: "代表神甘甜的呼召" }
+        ];
+
+        // ★★★ 未來建置好後端，請將此處替換為真實的 GAS API 網址 ★★★
+        const gasApiUrl = "https://script.google.com/macros/s/AKfycbyJIiJxWltb4LvaAn_QdwCyW5DYwljyuM8I2LjGQgJ-UYG999shQryXDYXJZbP428c/exec";
+
+        const form = document.getElementById('draw-form');
+        const formSection = document.getElementById('form-section');
+        const loadingSection = document.getElementById('loading-section');
+        const resultSection = document.getElementById('result-section');
+        const card = document.getElementById('verse-card');
+        const cardFront = document.getElementById('dynamic-card-front');
+        const scrambleTextElement = document.getElementById('scramble-text');
+        let scrambleInterval;
+
+        // 檢查是否為測試模式
+        const isTestMode = gasApiUrl.includes("你的部署ID");
+        if(isTestMode) {
+            document.getElementById('test-mode-warning').classList.remove('hidden');
+        }
+
+        function startScramble() {
+            let iteration = 0;
+            const finalWord = "CONNECTING_TO_HEAVEN...";
+            clearInterval(scrambleInterval);
+            scrambleInterval = setInterval(() => {
+                scrambleTextElement.innerText = finalWord.split('').map((l, i) => i < iteration ? finalWord[i] : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$'[Math.floor(Math.random() * 39)]).join('');
+                if(iteration >= finalWord.length) clearInterval(scrambleInterval);
+                iteration += 1 / 3; 
+            }, 30);
+        }
+
+        function showResult(name, randomVerse, randomTheme) {
+            document.getElementById('greeting-text').innerText = `${name}，這是給你的祝福！`;
+            document.getElementById('verse-zh').innerText = randomVerse.zh;
+            document.getElementById('verse-en').innerText = randomVerse.en;
+            document.getElementById('verse-ref').innerText = randomVerse.ref;
+            document.getElementById('snack-name').innerText = randomTheme.snack;
+            cardFront.style.background = randomTheme.bg; 
+
+            loadingSection.classList.add('hidden');
+            resultSection.classList.remove('hidden');
+            
+            setTimeout(() => {
+                card.classList.add('is-flipped');
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors: ['#bef264', '#ec4899', '#06b6d4', '#ffffff'] });
+            }, 100);
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+
+            formSection.classList.add('hidden');
+            loadingSection.classList.remove('hidden');
+            startScramble();
+
+            const randomVerse = verses[Math.floor(Math.random() * verses.length)];
+            const randomTheme = themeStyles[Math.floor(Math.random() * themeStyles.length)];
+
+            if (isTestMode) {
+                setTimeout(() => {
+                    clearInterval(scrambleInterval);
+                    if (Math.random() < 0.1) {
+                        alert('⚠️ (模擬測試) 這個 Email 已經領取過專屬經文卡囉！把機會留給其他人吧～');
+                        resetForm();
+                        return;
+                    }
+                    showResult(name, randomVerse, randomTheme);
+                }, 2000); 
+
+            } else {
+                const payload = {
+                    name: name,
+                    email: email,
+                    verseZh: randomVerse.zh,
+                    verseEn: randomVerse.en,
+                    verseRef: randomVerse.ref,
+                    bgColor: randomTheme.bg,
+                    snackName: randomTheme.snack
+                };
+
+                fetch(gasApiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    clearInterval(scrambleInterval);
+                    if(data.result === 'duplicate') {
+                        alert('⚠️ 這個 Email 已經領取過專屬經文卡囉！把機會留給其他人吧～');
+                        resetForm();
+                        return;
+                    }
+                    showResult(name, randomVerse, randomTheme);
+                })
+                .catch(error => {
+                    clearInterval(scrambleInterval);
+                    alert('網路連線異常，請確認網路後再試一次！');
+                    resetForm();
+                });
+            }
+        });
+
+        function resetForm() {
+            form.reset();
+            card.classList.remove('is-flipped');
+            resultSection.classList.add('hidden');
+            loadingSection.classList.add('hidden');
+            formSection.classList.remove('hidden');
+            clearInterval(scrambleInterval);
+        }
+    </script>
+</body>
+</html>
