@@ -79,7 +79,7 @@
                 <!-- 個資保護聲明 -->
                 <div class="p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
                     <p class="text-[10px] text-slate-400 leading-tight text-justify">
-                        【個資蒐集聲明】依據個人資料保護法第八條規定，大衛門徒營為辦理抽卡與活動聯繫之目的，將蒐集您的姓名與信箱。本單位僅於活動期間使用，不作其他用途。若不提供將無法參與抽卡。
+                        【個資蒐集聲明】依據個人資料保護法第八條規定，大衛門徒營為辦理抽卡與活動聯繫之目的，將蒐集您的姓名與信箱。本單位僅於活動期間使用，不作其他用途，謝謝。
                     </p>
                 </div>
                 
@@ -143,11 +143,47 @@
 
     <script>
         // --- ★★★ 這裡請貼上你完整的 40 節經文陣列 ★★★ ---
-        const verses = [
-            { ref: "撒母耳記上 16:7", zh: "耶和華不像人看人：人是看外貌；耶和華是看內心。", en: "The Lord does not look at the things people look at. People look at the outward appearance, but the Lord looks at the heart." },
-            { ref: "撒母耳記上 17:45", zh: "你來攻擊我，是靠著刀槍和銅戟；我來攻擊你，是靠著萬軍之耶和華的名。", en: "You come against me with sword and spear and javelin, but I come against you in the name of the Lord Almighty." },
-            { ref: "詩篇 16:11", zh: "你必將生命的道路指示我。在你面前有滿足的喜樂；在你右手中有永遠的福樂。", en: "You make known to me the path of life; you will fill me with joy in your presence, with eternal pleasures at your right hand." }
-            // ... (請補上其餘經文)
+        const verses = [    
+    { ref: "撒母耳記上 16:7", zh: "耶和華不像人看人：人是看外貌；耶和華是看內心。", en: "The Lord does not look at the things people look at. People look at the outward appearance, but the Lord looks at the heart." },
+    { ref: "撒母耳記上 17:45", zh: "你來攻擊我，是靠著刀槍和銅戟；我來攻擊你，是靠著萬軍之耶和華的名。", en: "You come against me with sword and spear and javelin, but I come against you in the name of the Lord Almighty." },
+    { ref: "撒母耳記上 30:6", zh: "大衛卻倚靠耶和華他的神，心裡堅固。", en: "But David found strength in the Lord his God." },
+    { ref: "詩篇 16:11", zh: "你必將生命的道路指示我。在你面前有滿足的喜樂；在你右手中有永遠的福樂。", en: "You make known to me the path of life; you will fill me with joy in your presence, with eternal pleasures at your right hand." },
+    { ref: "詩篇 18:2", zh: "耶和華是我的巖石，我的山寨，我的救主，我的神，我的磐石，我所投靠的。", en: "The Lord is my rock, my fortress and my deliverer; my God is my rock, in whom I take refuge, my shield and the horn of my salvation, my stronghold." },
+    { ref: "詩篇 23:1-2", zh: "耶和華是我的牧者，我必不致缺乏。他使我躺臥在青草地上，領我在可安歇的水邊。", en: "The Lord is my shepherd, I lack nothing. He makes me lie down in green pastures, he leads me beside quiet waters." },
+    { ref: "詩篇 23:4", zh: "我雖然行過死蔭的幽谷，也不怕遭害，因為你與我同在；你的杖，你的竿，都安慰我。", en: "Even though I walk through the darkest valley, I will fear no evil, for you are with me; your rod and your staff, they comfort me." },
+    { ref: "詩篇 27:1", zh: "耶和華是我的亮光，是我的拯救，我還怕誰呢？耶和華是我性命的保障，我還懼誰呢？", en: "The Lord is my light and my salvation—whom shall I fear? The Lord is the stronghold of my life—of whom shall I be afraid?" },
+    { ref: "詩篇 27:4", zh: "有一件事，我曾求耶和華，我仍要尋求：就是一生一世住在耶和華的殿中，瞻仰他的榮美。", en: "One thing I ask from the Lord, this only do I seek: that I may dwell in the house of the Lord all the days of my life, to gaze on the beauty of the Lord and to seek him in his temple." },
+    { ref: "詩篇 32:7", zh: "你是我藏身之處；你必保佑我脫離苦難，以得救的樂歌四面環繞我。", en: "You are my hiding place; you will protect me from trouble and surround me with songs of deliverance." },
+    { ref: "詩篇 34:8", zh: "你們要嘗嘗主恩的滋味，便知道他是美善；投靠他的人有福了！", en: "Taste and see that the Lord is good; blessed is the one who takes refuge in him." },
+    { ref: "詩篇 37:4", zh: "又要以耶和華為樂，他就將你心裡所求的賜給你。", en: "Take delight in the Lord, and he will give you the desires of your heart." },
+    { ref: "詩篇 37:5", zh: "當將你的事交託耶和華，並倚靠他，他就必成全。", en: "Commit your way to the Lord; trust in him and he will do this." },
+    { ref: "詩篇 46:1", zh: "神是我們的避難所，是我們的力量，是我們在患難中隨時的幫助。", en: "God is our refuge and strength, an ever-present help in trouble." },
+    { ref: "詩篇 51:10", zh: "神啊，求你為我造清潔的心，使我裡面重新有正直的靈。", en: "Create in me a pure heart, O God, and renew a steadfast spirit within me." },
+    { ref: "詩篇 62:1", zh: "我的心默默無聲，專等候神；我的救恩是從他而來。", en: "Truly my soul finds rest in God; my salvation comes from him." },
+    { ref: "詩篇 84:11", zh: "因為耶和華神是日頭，是盾牌，要賜下恩典和榮耀。他未嘗留下一樣好處不給那些行動正直的人。", en: "For the Lord God is a sun and shield; the Lord bestows favor and honor; no good thing does he withhold from those whose walk is blameless." },
+    { ref: "詩篇 103:2-3", zh: "我的心哪，你要稱頌耶和華！不可忘記他的一切恩惠！他赦免你的一切罪孽，醫治你的一切疾病。", en: "Praise the Lord, my soul, and forget not all his benefits—who forgives all your sins and heals all your diseases." },
+    { ref: "詩篇 119:105", zh: "你的話是我腳前的燈，是我路上的光。", en: "Your word is a lamp for my feet, a light on my path." },
+    { ref: "詩篇 121:1-2", zh: "我要向山舉目；我的幫助從何而來？我的幫助從造天地的耶和華而來。", en: "I lift up my eyes to the mountains—where does my help come from? My help comes from the Lord, the Maker of heaven and earth." },
+    { ref: "詩篇 139:14", zh: "我要稱謝你，因我受造，奇妙可畏；你的作為奇妙，這是我心深知道的。", en: "I praise you because I am fearfully and wonderfully made; your works are wonderful, I know that full well." },
+    { ref: "詩篇 139:23-24", zh: "神啊，求你鑒察我，知道我的心思，看在我裡面有什麼惡行沒有，引導我走永生的道路。", en: "Search me, God, and know my heart; test me and know my anxious thoughts. See if there is any offensive way in me, and lead me in the way everlasting." },
+    { ref: "箴言 3:5-6", zh: "你要專心仰賴耶和華，不可倚靠自己的聰明，在你一切所行的事上都要認定他，他必指引你的路。", en: "Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight." },
+    { ref: "箴言 4:23", zh: "你要保守你心，勝過保守一切，因為一生的果效是由心發出。", en: "Above all else, guard your heart, for everything you do flows from it." },
+    { ref: "以賽亞書 40:31", zh: "但那等候耶和華的必重新得力。他們必如鷹展翅上騰；他們奔跑卻不困倦，行走卻不疲乏。", en: "But those who hope in the Lord will renew their strength. They will soar on wings like eagles; they will run and not grow weary, they will walk and not be faint." },
+    { ref: "以賽亞書 41:10", zh: "你不要害怕，因為我與你同在；不要驚惶，因為我是你的神。我必堅固你，我必幫助你。", en: "So do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you; I will uphold you with my righteous right hand." },
+    { ref: "耶利米書 29:11", zh: "耶和華說：我知道我向你們所懷的意念是賜平安的意念，不是降災禍的意念，要叫你們末後有指望。", en: "For I know the plans I have for you,” declares the Lord, “plans to prosper you and not to harm you, plans to give you hope and a future." },
+    { ref: "耶利米哀歌 3:22-23", zh: "我們不致消滅，是出於耶和華諸般的慈愛；是因他的憐憫不致斷絕。每早晨，這都是新的；你的誠實極其廣大！", en: "Because of the Lord’s great love we are not consumed, for his compassions never fail. They are new every morning; great is your faithfulness." },
+    { ref: "西番雅書 3:17", zh: "耶和華你的神是施行拯救、大有能力的主。他在你中間必因你歡欣喜樂，默然愛你，且因你喜樂而歡呼。", en: "The Lord your God is with you, the Mighty Warrior who saves. He will take great delight in you; in his love he will no longer rebuke you, but will rejoice over you with singing." },
+    { ref: "馬太福音 11:28", zh: "凡勞苦擔重擔的人可以到我這裡來，我就使你們得安息。", en: "Come to me, all you who are weary and burdened, and I will give you rest." },
+    { ref: "約翰福音 14:27", zh: "我留下平安給你們；我將我的平安賜給你們。我所賜的，不像世人所賜的。你們心裡不要憂愁，也不要膽怯。", en: "Peace I leave with you; my peace I give you. I do not give to you as the world gives. Do not let your hearts be troubled and do not be afraid." },
+    { ref: "羅馬書 8:28", zh: "我們曉得萬事都互相效力，叫愛神的人得益處，就是按他旨意被召的人。", en: "And we know that in all things God works for the good of those who love him, who have been called according to his purpose." },
+    { ref: "羅馬書 12:2", zh: "不要效法這個世界，只要心意更新而變化，叫你們察驗何為神的善良、純全、可喜悅的旨意。", en: "Do not conform to the pattern of this world, but be transformed by the renewing of your mind. Then you will be able to test and approve what God’s will is—his good, pleasing and perfect will." },
+    { ref: "羅馬書 15:13", zh: "但願使人有盼望的神，因信將諸般的喜樂、平安充滿你們的心，使你們藉著聖靈的能力大有盼望。", en: "May the God of hope fill you with all joy and peace as you trust in him, so that you may overflow with hope by the power of the Holy Spirit." },
+    { ref: "哥林多後書 5:17", zh: "若有人在基督裡，他就是新造的人，舊事已過，都變成新的了。", en: "Therefore, if anyone is in Christ, the new creation has come: The old has gone, the new is here!" },
+    { ref: "加拉太書 5:22-23", zh: "聖靈所結的果子，就是仁愛、喜樂、和平、忍耐、恩慈、良善、信實、溫柔、節制。", en: "But the fruit of the Spirit is love, joy, peace, forbearance, kindness, goodness, faithfulness, gentleness and self-control." },
+    { ref: "以弗所書 2:10", zh: "我們原是他的工作，在基督耶穌裡造成的，為要叫我們行善，就是神所預備叫我們行的。", en: "For we are God’s handiwork, created in Christ Jesus to do good works, which God prepared in advance for us to do." },
+    { ref: "以弗所書 3:20", zh: "神能照著運行在我們心裡的大力充充足足地成就一切，超過我們所求所想的。", en: "Now to him who is able to do immeasurably more than all we ask or imagine, according to his power that is at work within us." },
+    { ref: "腓立比書 4:6-7", zh: "應當一無掛慮，只要凡事藉著禱告、祈求，和感謝，將你們所要的告訴神。神所賜出人意外的平安必在基督耶穌裡保守你們的心懷意念。", en: "Do not be anxious about anything, but in every situation, by prayer and petition, with thanksgiving, present your requests to God. And the peace of God, which transcends all understanding, will guard your hearts and your minds in Christ Jesus." },
+    { ref: "提摩太後書 1:7", zh: "因為神賜給我們，不是膽怯的心，乃是剛強、仁愛、謹守的心。", en: "For the Spirit God gave us does not make us timid, but gives us power, love and self-discipline." }
         ];
 
         // --- 糖果/小禮物綁定 ---
