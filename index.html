@@ -82,8 +82,6 @@
                         【個資蒐集聲明】依據個人資料保護法第八條規定，大衛門徒營為辦理抽卡與活動聯繫之目的，將蒐集您的姓名與信箱。本單位僅於活動期間使用，不作其他用途。若不提供將無法參與抽卡。
                     </p>
                 </div>
-
-                <p id="test-mode-warning" class="text-xs text-fuchsia-400 font-bold text-center hidden">※ 目前為模擬測試模式，不會真實寄信 ※</p>
                 
                 <button type="submit" id="submit-btn" class="btn-genz w-full font-black py-4 px-4 rounded-xl shadow-lg mt-2 text-lg">
                     🎰 啟動拉霸抽卡
@@ -149,7 +147,7 @@
             { ref: "撒母耳記上 16:7", zh: "耶和華不像人看人：人是看外貌；耶和華是看內心。", en: "The Lord does not look at the things people look at. People look at the outward appearance, but the Lord looks at the heart." },
             { ref: "撒母耳記上 17:45", zh: "你來攻擊我，是靠著刀槍和銅戟；我來攻擊你，是靠著萬軍之耶和華的名。", en: "You come against me with sword and spear and javelin, but I come against you in the name of the Lord Almighty." },
             { ref: "詩篇 16:11", zh: "你必將生命的道路指示我。在你面前有滿足的喜樂；在你右手中有永遠的福樂。", en: "You make known to me the path of life; you will fill me with joy in your presence, with eternal pleasures at your right hand." }
-            // ... (其餘 37 節)
+            // ... (請補上其餘經文)
         ];
 
         // --- 糖果/小禮物綁定 ---
@@ -187,39 +185,31 @@
 
         let slotInterval1, slotInterval2, slotInterval3;
 
-        const isTestMode = gasApiUrl.includes("你的部署ID");
-        if(isTestMode) document.getElementById('test-mode-warning').classList.remove('hidden');
-
         // 啟動拉霸機動畫
         function startSlotMachine() {
-            // 讓字體快速隨機切換
             slotInterval1 = setInterval(() => { slotText1.innerText = fakeBooks[Math.floor(Math.random() * fakeBooks.length)]; }, 50);
             slotInterval2 = setInterval(() => { slotText2.innerText = fakeNumbers[Math.floor(Math.random() * fakeNumbers.length)]; }, 50);
             slotInterval3 = setInterval(() => { slotText3.innerText = fakeIcons[Math.floor(Math.random() * fakeIcons.length)]; }, 50);
         }
 
-        // 停止拉霸機並定格結果 (帶有節奏感)
+        // 停止拉霸機並定格結果
         function stopSlotMachine(name, randomVerse, randomTheme) {
-            // 解析真實經文的書卷名與章節 (例如把 "撒母耳記上 16:7" 拆開)
             const refParts = randomVerse.ref.split(" ");
             const realBook = refParts[0] || "聖經";
             const realChapter = refParts[1] || "精選";
 
-            // 依序停止第一格
             setTimeout(() => {
                 clearInterval(slotInterval1);
                 slotText1.innerText = realBook;
                 slotBox1.classList.add('slot-locked');
             }, 500);
 
-            // 依序停止第二格
             setTimeout(() => {
                 clearInterval(slotInterval2);
                 slotText2.innerText = realChapter;
                 slotBox2.classList.add('slot-locked');
             }, 1200);
 
-            // 依序停止第三格
             setTimeout(() => {
                 clearInterval(slotInterval3);
                 slotText3.innerText = randomTheme.icon;
@@ -228,7 +218,6 @@
                 slotStatus.classList.add('text-bef264', 'animate-pulse');
             }, 1900);
 
-            // 動畫結束，切換到結果畫面
             setTimeout(() => {
                 showFinalResult(name, randomVerse, randomTheme);
             }, 3000);
@@ -259,59 +248,43 @@
             formSection.classList.add('hidden');
             slotMachineSection.classList.remove('hidden');
             
-            // 啟動動畫
             startSlotMachine();
 
-            // 決定抽籤結果
             const randomVerse = verses[Math.floor(Math.random() * verses.length)];
             const randomTheme = themeStyles[Math.floor(Math.random() * themeStyles.length)];
 
-            // 準備傳送資料
             const payload = {
                 name: name, email: email,
                 verseZh: randomVerse.zh, verseEn: randomVerse.en, verseRef: randomVerse.ref,
                 bgColor: randomTheme.bg, snackName: randomTheme.snack
             };
 
-            if (isTestMode) {
-                // 測試模式
-                setTimeout(() => {
-                    if (Math.random() < 0.1) {
-                        clearInterval(slotInterval1); clearInterval(slotInterval2); clearInterval(slotInterval3);
-                        alert('⚠️ (模擬測試) 這個 Email 已經領取過專屬經文卡囉！');
-                        resetForm(); return;
-                    }
-                    stopSlotMachine(name, randomVerse, randomTheme);
-                }, 1000); 
-            } else {
-                // 真實 API 串接
-                fetch(gasApiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if(data.result === 'duplicate') {
-                        clearInterval(slotInterval1); clearInterval(slotInterval2); clearInterval(slotInterval3);
-                        alert('⚠️ 這個 Email 已經領取過專屬經文卡囉！把機會留給其他人吧～');
-                        resetForm(); return;
-                    }
-                    stopSlotMachine(name, randomVerse, randomTheme);
-                })
-                .catch(error => {
+            // 真實 API 串接
+            fetch(gasApiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.result === 'duplicate') {
                     clearInterval(slotInterval1); clearInterval(slotInterval2); clearInterval(slotInterval3);
-                    alert('網路連線異常，請確認網路後再試一次！');
-                    resetForm();
-                });
-            }
+                    alert('⚠️ 這個 Email 已經領取過專屬經文卡囉！把機會留給其他人吧～');
+                    resetForm(); return;
+                }
+                stopSlotMachine(name, randomVerse, randomTheme);
+            })
+            .catch(error => {
+                clearInterval(slotInterval1); clearInterval(slotInterval2); clearInterval(slotInterval3);
+                alert('網路連線異常，請確認網路後再試一次！');
+                resetForm();
+            });
         });
 
         function resetForm() {
             form.reset();
             card.classList.remove('is-flipped');
             
-            // 復原拉霸機狀態
             slotBox1.classList.remove('slot-locked');
             slotBox2.classList.remove('slot-locked');
             slotBox3.classList.remove('slot-locked');
